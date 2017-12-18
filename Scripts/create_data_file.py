@@ -21,8 +21,8 @@ nwm_end = 0
 #ifis_start = 1
 #ifis_end = 1
 start_time = datetime.datetime(2017,2,25)
-end_time = datetime.datetime(2017,3,29)
-output_file = 'Feb25toMar29'
+end_time = datetime.datetime(2017,5,9)
+output_file = 'Feb25toMay09'
 constant_data = pd.read_csv('/Users/kjfries/Google Drive/Docs Kevin/National Water Model/NWM/Scripts/IFIS_NWM_data.txt',sep='\t')
 nwm_hours = range(nwm_start,nwm_end+1)
 #ifis_hours = range(ifis_start,ifis_end+1)

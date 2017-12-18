@@ -1,5 +1,5 @@
 clear all, close all
-data = readtable('cluster_data.txt');
+% data = readtable('cluster_data.txt');
 %% standardize data
 %leave covs, granger, dynamics the same, but setting NaN's to be bad
 standard = data;

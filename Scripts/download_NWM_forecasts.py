@@ -10,7 +10,7 @@ import numpy as np
 #need to figure out how to store data in panels with items being stations, major axis being time, and minor axis being
 #t+1 through t+15. then i append each item to a csv file over and over with index of time and columns of the t+1 to t+15
 
-#def download_NWM_forecasts():
+def download_NWM_forecasts():
 print(datetime.datetime.now())
 f = pd.read_csv('/Users/kjfries/Google Drive/Docs Kevin/National Water Model/NWM/Scripts/IFIS_NWM_data.txt',sep='\t')
 ids = f['nwm_id']
@@ -41,25 +41,34 @@ x = int(round(x.seconds/3600,0))
 all_flow = np.ndarray(shape=(len(ids),x,15))
 for i in range(0,x):
     for j in range(1,16):
-        filename = 'nwm.t%02dz.short_range.channel_rt.f%03d.conus.nc.gz' % (start_time.hour+i,j)
-        ftp.retrbinary('RETR '+filename,open(filename,'wb').write)
-        os.system('gzip -d '+filename)
-        filename = 'nwm.t%02dz.short_range.channel_rt.f%03d.conus.nc' % (start_time.hour+i,j)
-        temp = Dataset(filename)
-        os.remove(filename)
+        try:
+            #filename = 'nwm.t%02dz.short_range.channel_rt.f%03d.conus.nc.gz' % (start_time.hour+i,j)
+            filename = 'nwm.t%02dz.short_range.channel_rt.f%03d.conus.nc' % (start_time.hour+i,j)
+            print(filename)
+            ftp.retrbinary('RETR '+filename,open(filename,'wb').write)
+            #os.system('gzip -d '+filename)
+            #filename = 'nwm.t%02dz.short_range.channel_rt.f%03d.conus.nc' % (start_time.hour+i,j)
+            temp = Dataset(filename)
+            os.remove(filename)
 
-        stations = temp.variables['station_id']
-#        stations = list(stations[:])
-#        stations = pd.DataFrame(stations)
-#        ind = stations[stations.isin(list(ids))]
-#        ind = ind.dropna()
-#        ind = list(ind.index)
+            stations = temp.variables['feature_id']
+            #stations = pd.Series(stations[:])
+            #        stations = list(stations[:])
+            #        stations = pd.DataFrame(stations)
+            #        ind = stations[stations.isin(list(ids))]
+            #        ind = ind.dropna()
+            #        ind = list(ind.index)
 
-        flow = temp.variables['streamflow']
-        for k in range(0,len(ids)):
-            all_flow[k,i,j-1] = flow[stations==ids[k]]
+            flow = temp.variables['streamflow']
+            # all_flow[:,i,j-1] = flow[stations.isin(ids)]
+            temp = []
+            for k in range(0,len(ids)):
+                temp.append(flow[stations==ids[k]])
 
-        print('%d,%d' % (start_time.hour+i,j))
+            all_flow[:,i,j-1] = temp
+            print('%d,%d' % (start_time.hour+i,j))
+        except:
+            pass
 times = pd.date_range('%d/%d/%d %02d' % (start_time.month,start_time.day,start_time.year,start_time.hour),periods=x,freq='H')
 #all_flow = pd.Panel(data=all_flow,items=ids,major_axis=times,minor_axis=('t1','t2','t3','t4','t5','t6','t7','t8','t9','t10','t11','t12',
 #                                                                         't13','t14','t15'))
@@ -69,7 +78,7 @@ for i in range(0,len(ids)):
 
     new_lines = df.to_csv(sep='\t',float_format='%.7f',header=False)
 
-    with open('/Users/kjfries/Google Drive/Docs Kevin/National Water Model/NWM/Scripts/NWM_Data/%d.txt' % ids[i],'ab') as old_file:
+    with open('/Users/kjfries/Google Drive/Docs Kevin/National Water Model/NWM/Scripts/NWM_Data/%d.txt' % ids[i],'a') as old_file:
             old_file.write(new_lines)
 
 print(datetime.datetime.now())
